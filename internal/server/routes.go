@@ -18,7 +18,7 @@ func (s *Server) registerRoutes() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Handle("/web/*", http.StripPrefix("/web", handleServeWeb()))
-	r.Get("/healthz", handleHealthz())
+	r.Get("/healthz", handleHealthz(s.messageBroker))
 
 	r.Route("/rooms", func(r chi.Router) {
 		r.With(checkRoomId).Route("/{roomId}", func(r chi.Router) {

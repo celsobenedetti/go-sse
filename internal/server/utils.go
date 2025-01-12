@@ -10,14 +10,27 @@ func handleServeWeb() http.Handler {
 	return http.FileServer(http.Dir("web"))
 }
 
-func handleHealthz() http.HandlerFunc {
+func handleHealthz(messageBroker MessageBroker) http.HandlerFunc {
+	errors := []error{}
+
 	checks := map[string]string{
-		"messageBroker": "TODO",
-		"messageStore":  "TODO",
+		"messageStore": "TODO",
+	}
+
+	if msg, err := messageBroker.Health(); err != nil {
+		checks["messageBroker"] = err.Error()
+		errors = append(errors, err)
+	} else {
+		checks["messageBroker"] = msg
+	}
+
+	status := http.StatusOK
+	if len(errors) > 0 {
+		status = http.StatusInternalServerError
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		encode(w, checks, http.StatusOK)
+		encode(w, checks, status)
 	}
 }
 
