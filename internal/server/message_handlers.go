@@ -32,5 +32,7 @@ func handlePostMessage(broker MessageBroker) http.HandlerFunc {
 			fmt.Fprint(w, err)
 			return
 		}
+
+		fmt.Fprint(w, "OK")
 	}
 }
