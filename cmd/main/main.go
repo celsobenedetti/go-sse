@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -25,25 +26,25 @@ func run(ctx context.Context) error {
 
 	s := server.NewServer()
 
-	listenAndServe := func() {
-		fmt.Println("Listening on :3000")
-		if err := s.ListenAndServe(); err != nil {
-			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
-		}
-	}
-
-	gracefulShutdown := func() {
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if err := s.Shutdown(shutdownCtx); err != nil {
-			fmt.Fprintf(os.Stderr, "error shutting down http server %d\n", err)
-		}
-	}
-
-	go listenAndServe()
+	go listenAndServe(s)
 	<-ctx.Done()
-	gracefulShutdown()
+	gracefulShutdown(s)
 
 	return nil
+}
+
+func listenAndServe(s *http.Server) {
+	fmt.Println("Listening on :3000")
+	if err := s.ListenAndServe(); err != nil {
+		fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
+	}
+}
+
+func gracefulShutdown(s *http.Server) {
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := s.Shutdown(shutdownCtx); err != nil {
+		fmt.Fprintf(os.Stderr, "error shutting down http server %d\n", err)
+	}
 }
