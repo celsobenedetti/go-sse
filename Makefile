@@ -11,3 +11,6 @@ build:
 
 clean:
 	rm -r ./cmd/main/bin
+
+test:
+	go test ./...

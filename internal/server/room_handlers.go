@@ -18,11 +18,12 @@ func handleRoomSubscribe(broker MessageBroker) http.HandlerFunc {
 
 		}
 
-		ch, err := broker.Subscribe(roomId, userId)
+		ch, unsub, err := broker.Subscribe(roomId, userId)
 		if err != nil {
 			fmt.Fprintf(w, "error subscribing to room: %s %s", roomId, err)
 			return
 		}
+		defer unsub()
 
 		w.Header().Add("Content-Type", "text/event-stream")
 		w.Header().Add("Cache-Control", "no-cache")
@@ -32,6 +33,8 @@ func handleRoomSubscribe(broker MessageBroker) http.HandlerFunc {
 			case msg := <-ch:
 				event := "message"
 				encodeEvent(w, event, msg.Id, msg)
+			case <-r.Context().Done():
+				return
 			}
 		}
 	}
@@ -49,7 +52,7 @@ func checkRoomId(next http.Handler) http.Handler {
 		roomId := chi.URLParam(r, "roomId")
 		if len(roomId) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "roomId is required")
+			fmt.Printf("roomId is required")
 			return
 		}
 		next.ServeHTTP(w, r)
