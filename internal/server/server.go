@@ -10,8 +10,9 @@ import (
 )
 
 type Server struct {
-	port   int
-	router *chi.Mux
+	port          int
+	router        *chi.Mux
+	messageBroker MessageBroker
 }
 
 func NewServer() *http.Server {
@@ -23,8 +24,9 @@ func NewServer() *http.Server {
 	}
 
 	s := &Server{
-		port:   3000,
-		router: chi.NewRouter(),
+		port:          3000,
+		router:        chi.NewRouter(),
+		messageBroker: NewInMemoryMessageBroker(),
 	}
 
 	return &http.Server{

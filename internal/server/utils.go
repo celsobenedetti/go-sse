@@ -6,10 +6,8 @@ import (
 	"net/http"
 )
 
-func handleServeWeb() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		http.FileServer(http.Dir("web")).ServeHTTP(w, r)
-	}
+func handleServeWeb() http.Handler {
+	return http.FileServer(http.Dir("web"))
 }
 
 func handleHealthz() http.HandlerFunc {
