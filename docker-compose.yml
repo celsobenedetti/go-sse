@@ -1,0 +1,13 @@
+version: "3"
+services:
+  sqlite:
+    container_name: go-sse-sqlite
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    platform: linux/amd64
+    environment:
+      - SQLD_NODE=primary
+    ports:
+      - 8080:8080
+      - 5051:5051
+    volumes:
+      - ./data/libsql:/var/lib/sqld
