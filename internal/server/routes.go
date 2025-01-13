@@ -18,17 +18,17 @@ func (s *Server) registerRoutes() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Handle("/web/*", http.StripPrefix("/web", handleServeWeb()))
-	r.Get("/healthz", handleHealthz(s.messageBroker))
+	r.Get("/healthz", handleHealthz(s.pubsub))
 
 	r.Route("/rooms", func(r chi.Router) {
 		r.With(checkRoomId).Route("/{roomId}", func(r chi.Router) {
 			r.Get("/messages", handleGetRoomMessages())
-			r.Get("/subscribe/{userId}", handleRoomSubscribe(s.messageBroker))
+			r.Get("/subscribe/{userId}", handleRoomSubscribe(s.pubsub))
 		})
 	})
 
 	r.Route("/messages", func(r chi.Router) {
-		r.Post("/", handlePostMessage(s.messageBroker))
+		r.Post("/", handlePostMessage(s.pubsub))
 	})
 
 	return r

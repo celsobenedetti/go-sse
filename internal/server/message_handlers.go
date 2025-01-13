@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func handlePostMessage(broker MessageBroker) http.HandlerFunc {
+func handlePostMessage(broker *RedisPubSub) http.HandlerFunc {
 	type NewMessageReq struct {
 		RoomId   string `json:"roomId"`
 		SenderId string `json:"senderId"`

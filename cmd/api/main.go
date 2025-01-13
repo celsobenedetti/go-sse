@@ -12,14 +12,12 @@ import (
 )
 
 func main() {
-	fmt.Println("main.go")
-	//
-	// ctx := context.Background()
-	//
-	// if err := run(ctx); err != nil {
-	// 	fmt.Fprintf(os.Stderr, "%\n", err)
-	// 	os.Exit(1)
-	// }
+	ctx := context.Background()
+
+	if err := run(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "%\n", err)
+		os.Exit(1)
+	}
 }
 
 func run(ctx context.Context) error {
