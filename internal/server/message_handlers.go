@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func handlePostMessage(broker *RedisPubSub) http.HandlerFunc {
+func handlePostMessage(pubsub *RedisPubSub) http.HandlerFunc {
 	type NewMessageReq struct {
 		RoomId   string `json:"roomId"`
 		SenderId string `json:"senderId"`
@@ -21,7 +21,7 @@ func handlePostMessage(broker *RedisPubSub) http.HandlerFunc {
 
 		}
 
-		err = broker.Publish(Message{
+		err = pubsub.Publish(Message{
 			Id:       "TODO: we don't have message id",
 			RoomId:   msg.RoomId,
 			SenderId: msg.SenderId,
