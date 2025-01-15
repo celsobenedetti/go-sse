@@ -16,3 +16,7 @@ build:
 clean:
 	rm -r ./cmd/api/bin
 
+
+test: 
+	go test ./... 
+
