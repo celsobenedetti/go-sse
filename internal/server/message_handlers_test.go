@@ -2,17 +2,21 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/celsobenedetti/go-sse/testing/containers"
 )
 
 func Test_handlePostMessage(t *testing.T) {
 	t.Run("should return 422 if body does not include valid message", func(t *testing.T) {
-		pubsub := NewRedisPubSub()
+		pubsub, close := newRedisContainer(t)
+		defer close()
 
 		senderID := "123"
 		roomID := "123"
@@ -52,4 +56,16 @@ func Test_handlePostMessage(t *testing.T) {
 			})
 		}
 	})
+}
+
+func newRedisContainer(t *testing.T) (*RedisPubSub, func()) {
+	redisContainer, close, err := containers.Redis()
+	assert.Nil(t, err)
+
+	ctx := context.Background()
+	connectionString, err := redisContainer.Endpoint(ctx, "")
+	assert.Nil(t, err)
+
+	pubsub := NewRedisPubSub(connectionString)
+	return pubsub, close
 }
