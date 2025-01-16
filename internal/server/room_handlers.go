@@ -18,15 +18,15 @@ func handleRoomSubscribe(pubsub *RedisPubSub) http.HandlerFunc {
 
 		}
 
-		pubsub := pubsub.Subscribe(roomId)
-		defer pubsub.Close()
+		sub := pubsub.Subscribe(roomId)
+		defer sub.Close()
 
 		w.Header().Add("Content-Type", "text/event-stream")
 		w.Header().Add("Cache-Control", "no-cache")
 
 		for {
 			select {
-			case msg := <-pubsub.Channel():
+			case msg := <-sub.Channel():
 				event := "message"
 				encodeEvent(w, event, "id", msg.Payload)
 			case <-r.Context().Done():
