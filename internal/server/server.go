@@ -25,3 +25,7 @@ func NewServer() *http.Server {
 		Handler: s.registerRoutes(),
 	}
 }
+
+func handleServeWeb() http.Handler {
+	return http.FileServer(http.Dir("web"))
+}

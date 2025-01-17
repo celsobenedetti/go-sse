@@ -5,23 +5,11 @@ import (
 	"net/http"
 )
 
-func handleServeWeb() http.Handler {
-	return http.FileServer(http.Dir("web"))
-}
-
 func handleHealthz(redis *RedisPubSub) http.HandlerFunc {
+	checks := map[string]string{}
 	errors := []error{}
 
-	checks := map[string]string{
-		"messageStore": "TODO",
-	}
-
-	if msg, err := redis.Health(); err != nil {
-		checks["Redis"] = err.Error()
-		errors = append(errors, err)
-	} else {
-		checks["Redis"] = msg
-	}
+	errors = checkRedis(redis, checks, errors)
 
 	status := http.StatusOK
 	if len(errors) > 0 {
@@ -35,4 +23,14 @@ func handleHealthz(redis *RedisPubSub) http.HandlerFunc {
 			fmt.Fprintf(w, "error encoding healthz payload: %s", err.Error())
 		}
 	}
+}
+
+func checkRedis(redis *RedisPubSub, checks map[string]string, errors []error) []error {
+	m, err := redis.Health()
+	if err != nil {
+		errors = append(errors, err)
+		m = err.Error()
+	}
+	checks["Redis"] = m
+	return errors
 }
