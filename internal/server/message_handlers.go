@@ -5,13 +5,13 @@ import (
 	"net/http"
 )
 
-func handlePostMessage(broker MessageBroker) http.HandlerFunc {
-	type NewMessageReq struct {
-		RoomId   string `json:"roomId"`
-		SenderId string `json:"senderId"`
-		Message  string `json:"message"`
-	}
+type NewMessageReq struct {
+	RoomID   string `json:"roomId"`
+	SenderID string `json:"senderId"`
+	Message  string `json:"message"`
+}
 
+func handlePostMessage(pubsub *RedisPubSub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		msg, err := decode[NewMessageReq](r)
 		if err != nil {
@@ -21,10 +21,10 @@ func handlePostMessage(broker MessageBroker) http.HandlerFunc {
 
 		}
 
-		err = broker.Publish(Message{
+		err = pubsub.Publish(Message{
 			Id:       "TODO: we don't have message id",
-			RoomId:   msg.RoomId,
-			SenderId: msg.SenderId,
+			RoomId:   msg.RoomID,
+			SenderId: msg.SenderID,
 			Message:  msg.Message,
 		})
 		if err != nil {

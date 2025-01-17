@@ -7,9 +7,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func handleRoomSubscribe(broker MessageBroker) http.HandlerFunc {
+func handleRoomSubscribe(pubsub *RedisPubSub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		roomId := chi.URLParam(r, "roomId")
+		// TODO: should come from headers and middleware
 		userId := chi.URLParam(r, "userId")
 		if len(userId) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
@@ -18,21 +19,21 @@ func handleRoomSubscribe(broker MessageBroker) http.HandlerFunc {
 
 		}
 
-		ch, unsub, err := broker.Subscribe(roomId, userId)
-		if err != nil {
-			fmt.Fprintf(w, "error subscribing to room: %s %s", roomId, err)
-			return
-		}
-		defer unsub()
+		sub := pubsub.Subscribe(roomId)
+		defer sub.Close()
 
 		w.Header().Add("Content-Type", "text/event-stream")
 		w.Header().Add("Cache-Control", "no-cache")
 
 		for {
 			select {
-			case msg := <-ch:
+			case msg := <-sub.Channel():
 				event := "message"
-				encodeEvent(w, event, msg.Id, msg)
+				err := encodeEvent(w, event, "id", msg.Payload)
+				if err != nil {
+					fmt.Fprintf(w, "error encoding event in event-stream: %s", err.Error())
+					return
+				}
 			case <-r.Context().Done():
 				return
 			}

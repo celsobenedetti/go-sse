@@ -6,34 +6,6 @@ import (
 	"net/http"
 )
 
-func handleServeWeb() http.Handler {
-	return http.FileServer(http.Dir("web"))
-}
-
-func handleHealthz(messageBroker MessageBroker) http.HandlerFunc {
-	errors := []error{}
-
-	checks := map[string]string{
-		"messageStore": "TODO",
-	}
-
-	if msg, err := messageBroker.Health(); err != nil {
-		checks["messageBroker"] = err.Error()
-		errors = append(errors, err)
-	} else {
-		checks["messageBroker"] = msg
-	}
-
-	status := http.StatusOK
-	if len(errors) > 0 {
-		status = http.StatusInternalServerError
-	}
-
-	return func(w http.ResponseWriter, r *http.Request) {
-		encode(w, checks, status)
-	}
-}
-
 func encodeEvent[T any](w http.ResponseWriter, event, id string, data T) error {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -54,11 +26,11 @@ func encodeEvent[T any](w http.ResponseWriter, event, id string, data T) error {
 }
 
 func encode[T any](w http.ResponseWriter, v T, status int) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(v); err != nil {
 		return fmt.Errorf("encode json: %w", err)
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
 	return nil
 }
 
