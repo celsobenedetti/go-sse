@@ -3,10 +3,10 @@ package server
 import "encoding/json"
 
 type Message struct {
-	Id       string `json:"id"`
-	RoomId   string `json:"roomId"`
-	SenderId string `json:"senderId"`
-	Message  string `json:"message"`
+	Id       string `json:"id,omitempty"`
+	RoomId   string `json:"roomId,omitempty"`
+	SenderId string `json:"senderId,omitempty"`
+	Message  string `json:"message,omitempty"`
 }
 
 func (m Message) MarshalBinary() (data []byte, err error) {

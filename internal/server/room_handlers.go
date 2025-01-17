@@ -10,6 +10,7 @@ import (
 func handleRoomSubscribe(pubsub *RedisPubSub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		roomId := chi.URLParam(r, "roomId")
+		// TODO: should come from headers and middleware
 		userId := chi.URLParam(r, "userId")
 		if len(userId) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
@@ -28,7 +29,11 @@ func handleRoomSubscribe(pubsub *RedisPubSub) http.HandlerFunc {
 			select {
 			case msg := <-sub.Channel():
 				event := "message"
-				encodeEvent(w, event, "id", msg.Payload)
+				err := encodeEvent(w, event, "id", msg.Payload)
+				if err != nil {
+					fmt.Fprintf(w, "error encoding event in event-stream: %s", err.Error())
+					return
+				}
 			case <-r.Context().Done():
 				return
 			}

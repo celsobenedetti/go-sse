@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -10,21 +9,19 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/celsobenedetti/go-sse/testing/containers"
 )
 
 func Test_handlePostMessage(t *testing.T) {
-	pubsub, close := newRedisContainer(t)
+	pubsub, close := runRedisTestContainer(t)
 	defer close()
 
 	newRequest := func(msg NewMessageReq) (*httptest.ResponseRecorder, *http.Request) {
 		body, err := json.Marshal(msg)
 		assert.Nil(t, err)
 
-		req := httptest.NewRequest(http.MethodPost, "/messages", bytes.NewReader(body))
-		res := httptest.NewRecorder()
-		return res, req
+		r := httptest.NewRequest(http.MethodPost, "/messages", bytes.NewReader(body))
+		w := httptest.NewRecorder()
+		return w, r
 	}
 
 	t.Run("should return 422 if body does not include valid message", func(t *testing.T) {
@@ -52,13 +49,13 @@ func Test_handlePostMessage(t *testing.T) {
 		}
 		for _, tC := range testCases {
 			t.Run(tC.desc, func(t *testing.T) {
-				res, req := newRequest(tC.body)
+				w, r := newRequest(tC.body)
 
 				handle := handlePostMessage(pubsub)
-				handle(res, req)
+				handle(w, r)
 
 				// TODO: C-25 should be http.StatusUnprocessableEntity instead
-				assert.Equal(t, res.Result().StatusCode, http.StatusOK)
+				assert.Equal(t, w.Result().StatusCode, http.StatusOK)
 				assert.Equal(t, "true", "true")
 			})
 		}
@@ -75,9 +72,9 @@ func Test_handlePostMessage(t *testing.T) {
 		sub := pubsub.Subscribe(roomId)
 		defer sub.Close()
 
-		res, req := newRequest(msg)
+		w, r := newRequest(msg)
 		handle := handlePostMessage(pubsub)
-		handle(res, req)
+		handle(w, r)
 
 		timeout := time.NewTimer(1 * time.Second)
 
@@ -90,22 +87,11 @@ func Test_handlePostMessage(t *testing.T) {
 				assert.Equal(t, gotMsg.RoomId, msg.RoomID)
 				assert.Equal(t, gotMsg.SenderId, msg.SenderID)
 				assert.Equal(t, gotMsg.Message, msg.Message)
+				assert.Equal(t, w.Body.String(), "OK")
 				return
 			case <-timeout.C:
 				t.Fatalf("timed out without receiving message on subscriber")
 			}
 		}
 	})
-}
-
-func newRedisContainer(t *testing.T) (*RedisPubSub, func()) {
-	redisContainer, close, err := containers.Redis()
-	assert.Nil(t, err)
-
-	ctx := context.Background()
-	connectionString, err := redisContainer.Endpoint(ctx, "")
-	assert.Nil(t, err)
-
-	pubsub := NewRedisPubSub(connectionString)
-	return pubsub, close
 }
