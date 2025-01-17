@@ -22,7 +22,7 @@ func handlePostMessage(pubsub *RedisPubSub) http.HandlerFunc {
 		}
 
 		err = pubsub.Publish(Message{
-			Id:       "TODO: we don't have message id",
+			Id:       "TODO: C-19 message id should come from store",
 			RoomId:   msg.RoomID,
 			SenderId: msg.SenderID,
 			Message:  msg.Message,

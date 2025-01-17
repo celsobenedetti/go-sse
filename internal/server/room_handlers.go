@@ -10,7 +10,7 @@ import (
 func handleRoomSubscribe(pubsub *RedisPubSub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		roomId := chi.URLParam(r, "roomId")
-		// TODO: should come from headers and middleware
+		// TODO: C-27 should come from headers and middleware
 		userId := chi.URLParam(r, "userId")
 		if len(userId) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
