@@ -1,6 +1,9 @@
 package server
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func handleServeWeb() http.Handler {
 	return http.FileServer(http.Dir("web"))
@@ -26,6 +29,10 @@ func handleHealthz(redis *RedisPubSub) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		encode(w, checks, status)
+		err := encode(w, checks, status)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "error encoding healthz payload: %s", err.Error())
+		}
 	}
 }
