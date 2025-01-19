@@ -16,6 +16,7 @@
 !README.md
 !LICENSE
 !Makefile
+!justfile
 !.air.toml
 
 !*.yml
