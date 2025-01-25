@@ -18,6 +18,7 @@
 !Makefile
 !justfile
 !.air.toml
+!Dockerfile*
 
 !*.yml
 

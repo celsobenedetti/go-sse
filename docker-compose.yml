@@ -1,5 +1,13 @@
 version: "3"
 services:
+  api:
+    container_name: go-sse-api
+    build:
+      context: .
+      dockerfile: ./cmd/api/Dockerfile
+    ports:
+      - 3000:3000
+
   redis:
     container_name: go-sse-redis
     image: redis:7.4.2
