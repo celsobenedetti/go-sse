@@ -13,17 +13,16 @@
 !*.go
 !go.sum
 !go.mod
-
-!*.html
-!*.css
-!*.js
-!*.yml
-
 !README.md
 !LICENSE
-
 !Makefile
+!justfile
 !.air.toml
+
+!*.yml
+
+!web/**/**
+
 
 # ...even if they are in subdirectories
 !*/
