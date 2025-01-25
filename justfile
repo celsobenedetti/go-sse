@@ -1,6 +1,11 @@
+# github.com/casey/just
 # Default task that lists all available tasks
 default: 
 	just --list
+
+alias api := dev-api
+alias debug := debug-api
+alias web := dev-web
 
 
 # ========= Go API =========
@@ -33,6 +38,5 @@ test-api:
 # ========= Next client =========
 
 # Task to start the web client development server
-web:
+dev-web:
 	cd web && pnpm dev
-
