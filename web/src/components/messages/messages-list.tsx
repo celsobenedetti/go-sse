@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message, MessageProps } from "./message";
 
 const mockMessage = (m: string): MessageProps => ({
@@ -33,7 +34,7 @@ export function MessagesList() {
   }, []);
 
   return (
-    <div className="h-[inherit] overflow-y-scroll">
+    <ScrollArea className="h-full rounded-md border p-4">
       {messages.map(({ message, username, date }, i) => (
         <Message
           key={message + i}
@@ -42,6 +43,6 @@ export function MessagesList() {
           date={date}
         />
       ))}
-    </div>
+    </ScrollArea>
   );
 }
