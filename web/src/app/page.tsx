@@ -1,18 +1,21 @@
 "use client";
 
+import { useState } from "react";
+
 import { MessagesList } from "@/components/messages";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useSessionStore } from "@/store/session-store";
 
 export default function Home() {
   const [input, setInput] = useState("");
+  const { userId, username } = useSessionStore();
 
   const handleSubmit = () => {
     fetch("http://localhost:3000/messages", {
       method: "POST",
       body: JSON.stringify({
         message: input,
-        sender: "fb303474-b3d0-46a2-898d-61a098408bec",
+        sender: userId,
         roomId: "123",
       }),
     })
