@@ -39,6 +39,8 @@ func (s *Server) registerRoutes() http.Handler {
 		})
 	})
 
+	r.Post("/sessions", handleCreateSession())
+
 	r.Route("/messages", func(r chi.Router) {
 		r.Post("/", handlePostMessage(s.pubsub))
 	})
