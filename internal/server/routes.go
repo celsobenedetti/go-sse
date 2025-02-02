@@ -30,19 +30,19 @@ func (s *Server) registerRoutes() http.Handler {
 	}))
 
 	r.Handle("/web/*", http.StripPrefix("/web", handleServeWeb()))
-	r.Get("/healthz", handleHealthz(s.pubsub))
+	r.Get("/healthz", handleHealthz(s.redis.Pubsub))
 
 	r.Route("/rooms", func(r chi.Router) {
 		r.With(checkRoomId).Route("/{roomId}", func(r chi.Router) {
 			r.Get("/messages", handleGetRoomMessages())
-			r.Get("/subscribe/{userId}", handleRoomSubscribe(s.pubsub))
+			r.Get("/subscribe/{userId}", handleRoomSubscribe(s.redis.Pubsub))
 		})
 	})
 
-	r.Post("/sessions", handleCreateSession())
+	r.Post("/sessions", handleCreateSession(s.redis.KV))
 
 	r.Route("/messages", func(r chi.Router) {
-		r.Post("/", handlePostMessage(s.pubsub))
+		r.Post("/", handlePostMessage(s.redis.Pubsub))
 	})
 
 	return r

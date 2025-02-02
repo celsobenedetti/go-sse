@@ -15,10 +15,10 @@ import (
 )
 
 func Test_handleRoomSubscribe(t *testing.T) {
-	pubsub, close := runRedisTestContainer(t)
+	redis, close := runRedisTestContainer(t)
 	defer close()
 
-	handle := handleRoomSubscribe(pubsub)
+	handle := handleRoomSubscribe(redis.Pubsub)
 
 	t.Run("should receive published message", func(t *testing.T) {
 		roomId := "123"
@@ -44,7 +44,7 @@ func Test_handleRoomSubscribe(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 
 		// Publish the message
-		err := pubsub.Publish(msg)
+		err := redis.Pubsub.Publish(msg)
 		assert.Nil(t, err)
 
 		// Give some time for the message to be processed
@@ -71,7 +71,7 @@ func normalize(s string) string {
 	return s
 }
 
-func runRedisTestContainer(t *testing.T) (*RedisPubSub, func()) {
+func runRedisTestContainer(t *testing.T) (*RedisClient, func()) {
 	redisContainer, close, err := containers.Redis()
 	assert.Nil(t, err)
 
@@ -79,6 +79,6 @@ func runRedisTestContainer(t *testing.T) (*RedisPubSub, func()) {
 	connectionString, err := redisContainer.Endpoint(ctx, "")
 	assert.Nil(t, err)
 
-	pubsub := NewRedisPubSub(connectionString)
-	return pubsub, close
+	redis := NewRedisClient(connectionString)
+	return redis, close
 }

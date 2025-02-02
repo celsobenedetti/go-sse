@@ -10,14 +10,14 @@ import (
 type Server struct {
 	port   int
 	router *chi.Mux
-	pubsub *RedisPubSub
+	redis  *RedisClient
 }
 
 func NewServer() *http.Server {
 	s := &Server{
 		port:   3000,
 		router: chi.NewRouter(),
-		pubsub: NewRedisPubSub("localhost:6379"),
+		redis:  NewRedisClient("localhost:6379"),
 	}
 
 	return &http.Server{

@@ -7,13 +7,9 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func NewRedisPubSub(addr string) *RedisPubSub {
+func NewRedisPubSub(client *redis.Client) *RedisPubSub {
 	return &RedisPubSub{
-		rdb: redis.NewClient(&redis.Options{
-			Addr:     addr,
-			Password: "", // no password set
-			DB:       0,  // use default DB
-		}),
+		rdb: client,
 	}
 }
 
