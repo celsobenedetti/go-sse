@@ -36,7 +36,7 @@ func encode[T any](w http.ResponseWriter, v T, status int) error {
 
 func decode[T any](r *http.Request) (v T, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&v); err != nil {
-		return v, fmt.Errorf("decode json: %w", err)
+		return v, fmt.Errorf("failed to decode JSON for request body: %w", err)
 	}
 	return v, nil
 }
