@@ -20,7 +20,7 @@ clean:
 
 
 # Task to start the API development server using air
-dev-api: 
+dev-api: build-api
 	air
 
 # Run Delve debug server
