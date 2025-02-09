@@ -8,16 +8,18 @@ import (
 )
 
 type Server struct {
-	port   int
-	router *chi.Mux
-	redis  *RedisClient
+	port     int
+	router   *chi.Mux
+	redis    *RedisClient
+	sessions *SessionsModule
 }
 
-func NewServer() *http.Server {
+func NewServer(mongo *MongoClient) *http.Server {
 	s := &Server{
-		port:   3000,
-		router: chi.NewRouter(),
-		redis:  NewRedisClient("localhost:6379"),
+		port:     3000,
+		router:   chi.NewRouter(),
+		redis:    NewRedisClient("localhost:6379"),
+		sessions: NewSessionsModule(mongo),
 	}
 
 	return &http.Server{

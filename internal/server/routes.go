@@ -39,7 +39,7 @@ func (s *Server) registerRoutes() http.Handler {
 		})
 	})
 
-	r.Post("/sessions", handleCreateSession(s.redis.KV))
+	r.Post("/sessions", handleCreateSession(s.sessions.store))
 
 	r.Route("/messages", func(r chi.Router) {
 		r.Post("/", handlePostMessage(s.redis.Pubsub))

@@ -24,11 +24,16 @@ func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	s := server.NewServer()
+	mongo, err := server.NewMongoClient()
+	if err != nil {
+		return err
+	}
+
+	s := server.NewServer(mongo)
 
 	go listenAndServe(s)
 	<-ctx.Done()
-	gracefulShutdown(s)
+	gracefulShutdown(s, mongo)
 
 	return nil
 }
@@ -40,9 +45,13 @@ func listenAndServe(s *http.Server) {
 	}
 }
 
-func gracefulShutdown(s *http.Server) {
+func gracefulShutdown(s *http.Server, mongo *server.MongoClient) {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	if err := mongo.Disconnect(context.TODO()); err != nil {
+		fmt.Fprintf(os.Stderr, "error disconnecting Mongo Client %d\n", err)
+	}
 
 	if err := s.Shutdown(shutdownCtx); err != nil {
 		fmt.Fprintf(os.Stderr, "error shutting down http server %d\n", err)

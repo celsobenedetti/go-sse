@@ -7,13 +7,11 @@ import (
 )
 
 // TODO: probably should receive a SessionService or smth
-func handleCreateSession(kv *RedisKV) http.HandlerFunc {
+func handleCreateSession(sessionStore *SessionsStore) http.HandlerFunc {
 	type Request struct {
 		UserId   string `json:"user_id,omitempty"`
 		Username string `json:"username,omitempty"`
 	}
-
-	PREFIX := "sessions:"
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// 1. grab userId and username from request body
@@ -31,19 +29,17 @@ func handleCreateSession(kv *RedisKV) http.HandlerFunc {
 			return
 		}
 
-		// 2. save to redis KV
-		k := PREFIX + req.UserId
-		v := req.Username
-		err = kv.Set(k, v)
+		// 2. save to session store
+		err = sessionStore.Upsert(req.UserId, req.Username)
 		if err != nil {
 			msg := fmt.Sprintf("failed to write to Redis: %w", err)
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, msg, k, v)
+			fmt.Fprint(w, msg, req.UserId, req.Username)
 			slog.Error(msg)
 			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, "saved to KV: %s %s", k, v)
+		fmt.Fprintf(w, "session created: %s %s", req.UserId, req.Username)
 	}
 }
