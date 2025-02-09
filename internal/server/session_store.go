@@ -14,6 +14,7 @@ type Session struct {
 	Username string `bson:"username"`
 }
 
+// TODO: create TTL index
 type SessionsStore struct {
 	coll *mongo.Collection
 }
