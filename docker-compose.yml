@@ -39,5 +39,7 @@ services:
       interval: 10s
       start_period: 30s
     command: ["--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - go-sse-backend
 networks:
   go-sse-backend:
