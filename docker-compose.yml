@@ -21,17 +21,23 @@ services:
     networks:
       - go-sse-backend
 
-  # sqlite:
-  #   container_name: go-sse-sqlite
-  #   image: ghcr.io/tursodatabase/libsql-server:latest
-  #   platform: linux/amd64
-  #   environment:
-  #     - SQLD_NODE=primary
-  #   ports:
-  #     - 8080:8080
-  #     - 5051:5051
-  #   volumes:
-  #     - ./data/libsql:/var/lib/sqld
-
+  mongo:
+    container_name: go-sse-mongo
+    image: mongo:7
+    mem_limit: 5G
+    mem_reservation: 2.5G
+    restart: unless-stopped
+    hostname: mongodb
+    volumes:
+      - ./.docker/mongodb-data:/data/db/
+    environment:
+      MONGO_REPLICA_SET_NAME: "rs0"
+    ports:
+      - "27018:27017"
+    healthcheck:
+      test: test $$(mongosh --quiet --eval "print(rs.status().ok); process.exit();") -eq 1
+      interval: 10s
+      start_period: 30s
+    command: ["--replSet", "rs0", "--bind_ip_all"]
 networks:
   go-sse-backend:
